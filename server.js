@@ -14,6 +14,8 @@ const invitationRoutes = require ('./routes/invitationRoutes')
 const ticketRoutes = require ('./routes/ticketRoutes')
 const templateRoutes = require ('./routes/templateRoutes')
 const analyticsRoutes = require ('./routes/analyticsRoutes')
+const crypto = require('crypto');
+
 
 
 const path = require('path');
@@ -69,6 +71,36 @@ cron.schedule(
     timezone: "America/Los_Angeles", 
   }
 );
+
+
+
+app.post('/deploy', express.json(), (req, res) => {
+  const payload = JSON.stringify(req.body); // Convert request body to string
+  const sigHeader = req.headers['x-hub-signature-256']; // Get the GitHub signature header
+  const secret = process.env.GITHUB_WEBHOOK_SECRET; // Secret key (add this to your .env file)
+
+  // Verify signature
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = `sha256=${hmac.update(payload).digest('hex')}`;
+
+  if (crypto.timingSafeEqual(Buffer.from(sigHeader || ''), Buffer.from(digest))) {
+    console.log('✅ Webhook signature verified!');
+    // Deploy logic (e.g., pulling the latest changes)
+    const exec = require('child_process').exec;
+    exec('git pull && npm install && pm2 restart all', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`❌ Deployment failed: ${error.message}`);
+        return res.status(500).send('Deployment failed');
+      }
+      console.log(`🎉 Deployment successful:\n${stdout}`);
+      res.status(200).send('Deployment successful');
+    });
+  } else {
+    console.warn('❌ Webhook signature verification failed!');
+    return res.status(401).send('Unauthorized');
+  }
+});
+
 const runOnRestart = async () => {
   console.log("🚀 Server has restarted. Running immediate analytics creation job...");
   await analyticsController.createDailyAnalytics(); 
