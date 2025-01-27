@@ -75,11 +75,10 @@ cron.schedule(
 
 
 app.post('/deploy', express.json(), (req, res) => {
-  const payload = JSON.stringify(req.body); // Convert request body to string
-  const sigHeader = req.headers['x-hub-signature-256']; // Get the GitHub signature header
-  const secret = process.env.GITHUB_WEBHOOK_SECRET; // Secret key (add this to your .env file)
+  const payload = JSON.stringify(req.body);
+  const sigHeader = req.headers['x-hub-signature-256']; 
+  const secret = process.env.GITHUB_WEBHOOK_SECRET; 
 
-  // Verify signature
   const hmac = crypto.createHmac('sha256', secret);
   const digest = `sha256=${hmac.update(payload).digest('hex')}`;
 
