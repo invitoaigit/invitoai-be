@@ -2,7 +2,7 @@ const cors = require('cors');
 const express = require('express');
 
 const configureServer = (app) => {
-  const allowedOrigins = ['http://localhost:5173', 'https://invito.com', 'https://invitoai-fe.pages.dev'];
+  const allowedOrigins = ['http://localhost:5173', 'https://invitoai.website', 'https://invitoai-fe.pages.dev'];
 
   const corsOptions = {
     origin: (origin, callback) => {
