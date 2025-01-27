@@ -54,27 +54,7 @@ app.use('/api/v1/invitations', invitationRoutes);
 app.use('/api/v1/tickets', ticketRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/templates', templateRoutes);
-
-app.use((err, req, res, next) => {
-    console.error('❌ Server Error:', err.message); 
-    errorLogger(err, req, res, next);              
-    res.status(500).json({ error: 'Internal Server Error' });
-});
-
-cron.schedule(
-  "0 0 * * *",
-  async () => {
-    console.log("Running daily analytics creation job...");
-    await analyticsController.createDailyAnalytics();
-  },
-  {
-    timezone: "America/Los_Angeles", 
-  }
-);
-
-
-
-app.post('/deploy', express.json(), (req, res) => {
+app.post('/deploy', express.json({ limit: '10mb' }), (req, res) => {
   const payload = JSON.stringify(req.body);
   const sigHeader = req.headers['x-hub-signature-256']; 
   const secret = process.env.GITHUB_WEBHOOK_SECRET; 
@@ -99,6 +79,27 @@ app.post('/deploy', express.json(), (req, res) => {
     return res.status(401).send('Unauthorized');
   }
 });
+
+app.use((err, req, res, next) => {
+    console.error('❌ Server Error:', err.message); 
+    errorLogger(err, req, res, next);              
+    res.status(500).json({ error: 'Internal Server Error' });
+});
+
+cron.schedule(
+  "0 0 * * *",
+  async () => {
+    console.log("Running daily analytics creation job...");
+    await analyticsController.createDailyAnalytics();
+  },
+  {
+    timezone: "America/Los_Angeles", 
+  }
+);
+
+
+
+
 
 const runOnRestart = async () => {
   console.log("🚀 Server has restarted. Running immediate analytics creation job...");
