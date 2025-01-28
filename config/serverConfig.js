@@ -6,13 +6,12 @@ const configureServer = (app) => {
 
   const corsOptions = {
     origin: (origin, callback) => {
-      if (!origin) {
-      
+      if (!origin || origin.includes('github.com')) {
         callback(null, true);
       } else {
         const url = new URL(origin);
-        const baseDomain = url.hostname.replace(/^[^.]+\./, ''); 
-
+        const baseDomain = url.hostname.replace(/^[^.]+\./, '');
+  
         if (
           allowedOrigins.includes(origin) || 
           allowedOrigins.some(allowedOrigin => allowedOrigin.includes(baseDomain))
@@ -23,8 +22,9 @@ const configureServer = (app) => {
         }
       }
     },
-    credentials: true, 
+    credentials: true,
   };
+  
 
   app.use(cors(corsOptions));
   app.use(express.json());
