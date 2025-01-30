@@ -6,6 +6,7 @@ const templateSchema = new mongoose.Schema({
     category: { type: String, required: true},
     youtubeLink: { type: String},
     price: { type: String, required: true },
+    live: { type: Boolean, default: false},
     currency: { type: String, required: true },
     discount: { type: String, default: '0%' },
     templateData: { type: Object, default: {} },
