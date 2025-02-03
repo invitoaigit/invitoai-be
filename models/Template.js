@@ -5,6 +5,7 @@ const templateSchema = new mongoose.Schema({
     image: { type: String, required: true },
     category: { type: String, required: true},
     youtubeLink: { type: String},
+    description: { type: String},
     price: { type: String, required: true },
     live: { type: Boolean, default: false},
     currency: { type: String, required: true },

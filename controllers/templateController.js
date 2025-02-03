@@ -24,8 +24,8 @@ exports.getTemplateById = async (req, res) => {
 // Create a new template
 exports.createTemplate = async (req, res) => {
     try {
-        const { name, image, category, price, discount, currency, youtubeLink, templateData } = req.body;
-        const newTemplate = new Template({ name, image, category, currency, youtubeLink, price, discount, templateData });
+        const { name, image, category, price, discount, currency, youtubeLink, templateData, description } = req.body;
+        const newTemplate = new Template({ name, image, category, currency, youtubeLink, price, discount, templateData, description });
         const savedTemplate = await newTemplate.save();
         res.status(201).json(savedTemplate);
     } catch (error) {
