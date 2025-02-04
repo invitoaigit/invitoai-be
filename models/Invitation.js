@@ -8,6 +8,7 @@ const invitationSchema = new mongoose.Schema({
     template: { type: Object, default: {} },
     rsvpData: [{type: Object}],
     expiryTime: { type: Date},
+    type: { type: String, default: "default"},
     paid: {type: Boolean, default:false},
     invitesData: [{type: Object}]
 }, { timestamps: true });
