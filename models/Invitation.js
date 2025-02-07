@@ -13,7 +13,7 @@ const invitationSchema = new mongoose.Schema({
     description: { type: String, default: ""},
     whatsapp: { type: String, default: ""},
     paid: {type: Boolean, default:false},
-    charges: {type: String, default:""},
+    charges: {type: Object, default:{}},
     customDomain: {type: Boolean, default:false},
     invitesData: [{type: Object}]
 }, { timestamps: true });
