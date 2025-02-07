@@ -118,7 +118,7 @@ exports.updateInvitation = async (req, res) => {
             expiryDate.setFullYear(expiryDate.getFullYear() + 1); 
             invitation.expiryTime = expiryDate;
             await invitation.save();
-            if(customer){
+            if(customer && customer.invitationsLimit < 3){
                 customer.invitationsLimit = customer.invitationsLimit + 1;
                 await customer.save();
             }
@@ -150,6 +150,13 @@ exports.deleteInvitation = async (req, res) => {
 
         // Find and delete the invitation
         const deletedInvitation = await Invitation.findOneAndDelete({ uniqueName });
+
+        const customer = await User.findOne({email: deletedInvitation.user}) 
+
+        if(customer && customer.invitationsLimit < 3){
+            customer.invitationsLimit = customer.invitationsLimit + 1;
+            await customer.save();
+        }
 
         if (!deletedInvitation) {
             return res.status(404).json({ message: 'Invitation not found' });
