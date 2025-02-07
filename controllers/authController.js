@@ -49,9 +49,43 @@ const login = async (req, res) => {
     const token = jwt.sign({ id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, invitationsLimit: user.invitationsLimit }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
-    res.status(200).json({ token });
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN } 
+    );
+    user.refreshToken = refreshToken;
+    await user.save();
+    res.status(200).json({ token, refreshToken });
   } catch (error) {
     res.status(500).json({ error: 'Login failed!' });
+  }
+};
+const refreshToken = async (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(401).json({ error: 'Refresh token required!' });
+  }
+
+  try {
+    // Verify the refresh token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Find user in DB
+    const user = await User.findById(decoded.id);
+    if (!user || user.refreshToken !== token) {
+      return res.status(403).json({ error: 'Invalid refresh token!' });
+    }
+
+    const newAccessToken = jwt.sign(
+      { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, invitationsLimit: user.invitationsLimit },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+
+    res.status(200).json({ token: newAccessToken });
+  } catch (error) {
+    res.status(403).json({ error: 'Invalid or expired refresh token!' });
   }
 };
 
@@ -108,4 +142,4 @@ const resetPassword = async (req, res) => {
 };
 
 
-module.exports = { signup, login, forgotPassword, resetPassword };
+module.exports = { signup, login, forgotPassword, resetPassword, refreshToken };
