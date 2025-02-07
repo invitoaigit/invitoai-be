@@ -7,7 +7,7 @@ const path = require('path');
 
 exports.createInvitation = async (req, res) => {
     try {
-        const { name, image, uniqueName, user, template, paid, type } = req.body;
+        const { name, image, uniqueName, user, template, paid, type, description, whatsapp, customDomain } = req.body;
 
         // Check if uniqueName already exists
         const existingInvitation = await Invitation.findOne({ uniqueName });
@@ -34,6 +34,9 @@ exports.createInvitation = async (req, res) => {
             paid,
             type,
             expiryTime,
+            description, 
+            whatsapp, 
+            customDomain,
         });
 
         const savedInvitation = await newInvitation.save();

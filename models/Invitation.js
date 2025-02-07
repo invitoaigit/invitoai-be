@@ -9,7 +9,10 @@ const invitationSchema = new mongoose.Schema({
     rsvpData: [{type: Object}],
     expiryTime: { type: Date},
     type: { type: String, default: "default"},
+    description: { type: String, default: ""},
+    whatsapp: { type: String, default: ""},
     paid: {type: Boolean, default:false},
+    customDomain: {type: Boolean, default:false},
     invitesData: [{type: Object}]
 }, { timestamps: true });
 
