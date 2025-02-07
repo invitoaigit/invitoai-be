@@ -1,5 +1,6 @@
 const Invitation = require('../models/Invitation');
 const Analytics = require("../models/Analytics");
+const User = require('../models/User');
 const fs = require('fs');
 const path = require('path');
 
@@ -14,6 +15,7 @@ exports.createInvitation = async (req, res) => {
         if (existingInvitation) {
             return res.status(400).json({ error: 'The unique name already exists. Please choose a different one.' });
         }
+        const customer = await User.findOne({email: user}) 
 
         // Calculate expiryTime
         const currentDate = new Date();
@@ -40,6 +42,11 @@ exports.createInvitation = async (req, res) => {
         });
 
         const savedInvitation = await newInvitation.save();
+
+        if(customer){
+            customer.invitationsLimit = customer.invitationsLimit - 1;
+            await customer.save();
+        }
 
         // Handle analytics update
         const today = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
@@ -98,17 +105,23 @@ exports.updateInvitation = async (req, res) => {
         const updatedData = req.body;
 
         const invitation = await Invitation.findOne({ uniqueName });
+       
 
         if (!invitation) {
             return res.status(404).json({ message: 'Invitation not found' });
         }
 
+        const customer = await User.findOne({email: invitation.user}) 
 
         if (updatedData.paid) {
             const expiryDate = new Date(invitation.createdAt);
             expiryDate.setFullYear(expiryDate.getFullYear() + 1); 
             invitation.expiryTime = expiryDate;
             await invitation.save();
+            if(customer){
+                customer.invitationsLimit = customer.invitationsLimit + 1;
+                await customer.save();
+            }
         }
 
 

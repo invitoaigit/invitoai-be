@@ -12,8 +12,9 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
-  subscription: {
-
+  invitationsLimit: {
+    type: Number,
+    default: 3,
   },
   phone: {
     type: String,
