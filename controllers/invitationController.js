@@ -97,6 +97,21 @@ exports.getInvitationByUniqueName = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+exports.getInvitationByDomain = async (req, res) => {
+    try {
+        const { domain } = req.params;
+
+        const invitation = await Invitation.findOne({ domain });
+
+        if (!invitation) {
+            return res.status(404).json({ message: 'Invitation not found' });
+        }
+
+        res.status(200).json(invitation);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 // Update an invitation by uniqueName
 exports.updateInvitation = async (req, res) => {
