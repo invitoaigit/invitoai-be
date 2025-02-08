@@ -52,7 +52,7 @@ const login = async (req, res) => {
     const refreshToken = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN } 
+      { expiresIn: '7d' } 
     );
     user.refreshToken = refreshToken;
     await user.save();
@@ -85,7 +85,7 @@ const refreshToken = async (req, res) => {
 
     res.status(200).json({ token: newAccessToken });
   } catch (error) {
-    res.status(403).json({ error: 'Invalid or expired refresh token!' });
+    res.status(403).json({ error: 'Expired Login! Please login again!' });
   }
 };
 
