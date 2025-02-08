@@ -12,7 +12,7 @@ router.get('/', invitationController.getInvitations);
 router.get('/:uniqueName', invitationController.getInvitationByUniqueName);
 
 // Get a specific invitation by domain
-router.get('/:domain', invitationController.getInvitationByDomain);
+router.get('/domain/:domain', invitationController.getInvitationByDomain);
 
 // Update a specific invitation by uniqueName
 router.put('/:uniqueName', invitationController.updateInvitation);
