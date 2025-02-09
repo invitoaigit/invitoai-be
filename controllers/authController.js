@@ -40,6 +40,10 @@ const verifyOTP = async (req, res) => {
 const signup = async (req, res) => {
   const { name, email, phone, password, role } = req.body;
   try {
+    const duplicate = await User.findOne({ email });
+    if (duplicate) {
+      return res.status(401).json({ error: 'Email Is already registered!' });
+    }
     const user = new User({ name, email, phone, password, role });
     await user.save();
 
