@@ -3,7 +3,39 @@ const User = require('../models/User');
 const sendEmail = require('../utils/email');
 const Analytics = require("../models/Analytics");
 
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
+
+const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+      const user = await User.findOne({ email });
+      if (!user || !user.emailOTP || !user.emailExpires) {
+          return res.status(400).json({ error: 'Invalid OTP or user not found' });
+      }
+
+      const currentTime = new Date();
+      if (currentTime > user.emailExpires) {
+          return res.status(400).json({ error: 'OTP expired' });
+      }
+
+      if (user.emailOTP !== otp) {
+          return res.status(400).json({ error: 'Invalid OTP' });
+      }
+
+      user.emailOTP = null;
+      user.emailExpires = null;
+      user.verified = true;
+      await user.save();
+
+      res.status(200).json({ message: 'OTP verified successfully' });
+  } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Error verifying OTP' });
+  }
+};
 // Signup
 const signup = async (req, res) => {
   const { name, email, phone, password, role } = req.body;
@@ -11,6 +43,9 @@ const signup = async (req, res) => {
     const user = new User({ name, email, phone, password, role });
     await user.save();
 
+    const otp = generateOTP();
+    const expiry = new Date();
+    expiry.setMinutes(expiry.getMinutes() + 30);
     // Get today's date in PST (year, month, day)
     const today = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
     const todayDate = new Date(today).toISOString().split("T")[0];
@@ -20,6 +55,12 @@ const signup = async (req, res) => {
       createdAt: { $gte: new Date(todayDate), $lt: new Date(todayDate + "T23:59:59.999Z") }
     });
   
+    await sendEmail(email, 'Email Verification', `This code will expire in 30 minutes. OTP: ${otp}`);
+
+    user.emailOTP = otp;
+    user.emailExpires = expiry;
+    await user.save();
+
     if (!analytics) {
       // Create a new analytics record if it doesn't exist
       analytics = new Analytics({ userCount: 1 });
@@ -142,4 +183,4 @@ const resetPassword = async (req, res) => {
 };
 
 
-module.exports = { signup, login, forgotPassword, resetPassword, refreshToken };
+module.exports = { signup, login, forgotPassword, resetPassword, refreshToken, verifyOTP };
