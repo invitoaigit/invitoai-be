@@ -182,5 +182,30 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const resendOTP = async (req, res) => {
+  const { email } = req.body;
+  try {
+      const user = await User.findOne({ email });
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
 
-module.exports = { signup, login, forgotPassword, resetPassword, refreshToken, verifyOTP };
+      const otp = generateOTP();
+      const expiry = new Date();
+      expiry.setMinutes(expiry.getMinutes() + 30);
+
+      await sendEmail(email, 'Resend OTP', `This code will expire in 30 minutes. OTP: ${otp}`);
+
+      user.emailOTP = otp;
+      user.emailExpires = expiry;
+      await user.save();
+
+      res.status(200).json({ message: 'OTP resent successfully' });
+  } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Error resending OTP' });
+  }
+};
+
+
+module.exports = { signup, login, forgotPassword, resetPassword, refreshToken, verifyOTP, resendOTP };
