@@ -4,6 +4,7 @@ const templateSchema = new mongoose.Schema({
     name: { type: String, required: true },
     image: { type: String, required: true },
     category: { type: String, required: true},
+    type: { type: String, default: "default"},
     youtubeLink: { type: String},
     description: { type: String, default: ""},
     price: { type: String, required: true },
