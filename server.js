@@ -9,6 +9,7 @@ const cron = require("node-cron");
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const uploadRoutes = require('./routes/upload');
+const uploadTemplateRoutes = require('./routes/uploadTemplateData');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const invitationRoutes = require ('./routes/invitationRoutes')
 const ticketRoutes = require ('./routes/ticketRoutes')
@@ -34,6 +35,7 @@ app.use(requestLogger);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/invitations_data', express.static(path.join(__dirname, 'invitations_data')));
+app.use('/templates_data', express.static(path.join(__dirname, 'templates_data')));
 
 
 app.get('/', (req, res) => {
@@ -47,6 +49,7 @@ app.get('/', (req, res) => {
  */
 app.use('/api/v1', apiRoutes);
 app.use('/api/v1', uploadRoutes);
+app.use('/api/v1/template', uploadTemplateRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/subscriptions', subscriptionRoutes);
@@ -54,7 +57,7 @@ app.use('/api/v1/invitations', invitationRoutes);
 app.use('/api/v1/tickets', ticketRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/templates', templateRoutes);
-app.post('/deploy', express.json({ limit: '10mb' }), (req, res) => {
+app.post('/deploy', express.json({ limit: '50mb' }), (req, res) => {
   const payload = JSON.stringify(req.body);
   const sigHeader = req.headers['x-hub-signature-256']; 
   const secret = process.env.GITHUB_WEBHOOK_SECRET; 
@@ -64,7 +67,6 @@ app.post('/deploy', express.json({ limit: '10mb' }), (req, res) => {
 
   if (crypto.timingSafeEqual(Buffer.from(sigHeader || ''), Buffer.from(digest))) {
     console.log('✅ Webhook signature verified!');
-    // Deploy logic (e.g., pulling the latest changes)
     const exec = require('child_process').exec;
     exec('git pull && npm install && pm2 restart all', (error, stdout, stderr) => {
       if (error) {

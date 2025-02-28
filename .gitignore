@@ -11,6 +11,7 @@ lerna-debug.log*
 
 node_modules
 invitations_data
+templates_data
 dist
 dist-ssr
 *.local

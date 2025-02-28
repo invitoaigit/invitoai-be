@@ -28,7 +28,10 @@ const storage = multer.diskStorage({
 });
 
 // Configure multer
-const upload = multer({ storage });
+const upload = multer({ 
+  storage, 
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 // Define upload route
 router.post('/upload', upload.single('file'), async (req, res) => {
@@ -48,6 +51,11 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     });
   } catch (error) {
     console.error('File upload error:', error.message);
+
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'File size exceeds the 10MB limit' });
+    }
+
     res.status(500).json({ error: error.message });
   }
 });
