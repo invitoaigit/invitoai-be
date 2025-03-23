@@ -212,7 +212,14 @@ const deleteExpiredInvitations = async () => {
                 console.log(`Deleted folder: ${folderPath}`);
             }
 
-            await Invitation.deleteOne({ _id: invitation._id });
+            const deletedInvitation = await Invitation.deleteOne({ _id: invitation._id });
+            
+            const customer = await User.findOne({email: deletedInvitation.user}) 
+
+            if(customer && customer.invitationsLimit < 3){
+                customer.invitationsLimit = customer.invitationsLimit + 1;
+                await customer.save();
+            }
         }
 
         console.log(`Deleted ${expiredInvitations.length} expired invitations.`);
