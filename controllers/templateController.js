@@ -1,5 +1,6 @@
 const Template = require('../models/Template'); 
-
+const fs = require('fs');
+const path = require('path');
 // Get all templates
 exports.getAllTemplates = async (req, res) => {
     try {
@@ -48,13 +49,29 @@ exports.updateTemplate = async (req, res) => {
     }
 };
 
-// Delete a template by ID
+
 exports.deleteTemplate = async (req, res) => {
     try {
-        const deletedTemplate = await Template.findByIdAndDelete(req.params.id);
-        if (!deletedTemplate) return res.status(404).json({ message: "Template not found" });
-        res.status(200).json({ message: "Template deleted successfully" });
+      const deletedTemplate = await Template.findByIdAndDelete(req.params.id);
+  
+      if (!deletedTemplate)
+        return res.status(404).json({ message: "Template not found" });
+  
+
+      const folderName = deletedTemplate.name.replace(/\s+/g, '');
+      const folderPath = path.join(__dirname, '..', 'templates_data', folderName);
+  
+
+      if (fs.existsSync(folderPath)) {
+        fs.rmSync(folderPath, { recursive: true, force: true });
+        console.log(`Deleted folder: ${folderPath}`);
+      } else {
+        console.warn(`Folder not found: ${folderPath}`);
+      }
+  
+      res.status(200).json({ message: "Template and folder deleted successfully" });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      console.error("Error deleting template:", error);
+      res.status(500).json({ message: error.message });
     }
-};
+  };

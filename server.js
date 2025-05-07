@@ -11,6 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 const uploadRoutes = require('./routes/upload');
 const uploadTemplateRoutes = require('./routes/uploadTemplateData');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 const invitationRoutes = require ('./routes/invitationRoutes')
 const ticketRoutes = require ('./routes/ticketRoutes')
 const templateRoutes = require ('./routes/templateRoutes')
@@ -49,6 +50,7 @@ app.get('/', (req, res) => {
  */
 app.use('/api/v1', apiRoutes);
 app.use('/api/v1', uploadRoutes);
+app.use('/api/v1', paymentRoutes);
 app.use('/api/v1/template', uploadTemplateRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
