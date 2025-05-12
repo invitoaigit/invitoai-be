@@ -10,13 +10,15 @@ const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const templateName = req.query.templateName;
+    let templateName = req.query.templateName;
 
     if (!templateName) {
       return cb(new Error('TemplateName is required to save the files'), null);
     }
 
-    // Define and create directory
+
+    templateName = templateName.replace(/[^a-zA-Z0-9-_]/g, '_');
+
     const dirPath = path.join(__dirname, '..', 'templates_data', templateName);
     fs.mkdirSync(dirPath, { recursive: true });
     cb(null, dirPath);
@@ -35,7 +37,8 @@ router.post('/upload', upload.array('files', 30), async (req, res) => {
     }
 
     const serverLink = process.env.SERVER_LINK;
-    const templateName = req.query.templateName;
+    let templateName = req.query.templateName;
+    templateName = templateName.replace(/[^a-zA-Z0-9-_]/g, '_');
 
     // Generate URLs for all uploaded files
     const fileUrls = req.files.map(file => {
@@ -55,7 +58,8 @@ router.post('/upload', upload.array('files', 30), async (req, res) => {
 
 router.get('/files', async (req, res) => {
   try {
-    const templateName = req.query.templateName;
+    let templateName = req.query.templateName;
+    templateName = templateName.replace(/[^a-zA-Z0-9-_]/g, '_');
 
     if (!templateName) {
       return res.status(400).json({ error: 'TemplateName is required' });
@@ -90,7 +94,8 @@ router.get('/files', async (req, res) => {
 
 router.put('/update', async (req, res) => {
   try {
-    const templateName = req.query.templateName;
+    let templateName = req.query.templateName;
+    templateName = templateName.replace(/[^a-zA-Z0-9-_]/g, '_');
     const receivedFiles = req.body.files; 
 
     if (!templateName) {
